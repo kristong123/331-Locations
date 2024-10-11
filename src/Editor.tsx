@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useRef } from 'react';
 import { Location, Marker, COLORS } from './marker';
 import { BUILDINGS } from './buildings';
 
@@ -40,12 +40,13 @@ export class Editor extends Component<EditorProps, EditorState> {
   };
 
   render = (): JSX.Element => {
+    const selectColor = useRef<HTMLSelectElement>(null);
     return <div>
         <p>
           Name: <input type="text" value={this.state.name} readOnly/>
         </p>
         <p>
-          Move To: <select>
+          Move To: <select> 
             {BUILDINGS.map((building) => (
               <option key={building.longName} value={building.longName}>
                 {building.longName}
@@ -54,7 +55,7 @@ export class Editor extends Component<EditorProps, EditorState> {
           </select>
         </p>
         <p>
-          Color: <select onChange={(e) => this.setState({color: e.target.value})}>
+          Color: <select ref={selectColor}>
             {COLORS.map((color) => (
               <option key={color} value={color}>
                 {color}
@@ -64,7 +65,7 @@ export class Editor extends Component<EditorProps, EditorState> {
         </p>
         <button onClick={() => this.props.onSaveClick(
           this.state.name,
-          this.state.color, 
+          selectColor.current!.value, 
           this.props.marker.location
         )}>Save</button>
         <button onClick={this.props.onCancelClick}>Cancel</button>
