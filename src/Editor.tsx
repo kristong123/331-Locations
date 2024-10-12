@@ -19,7 +19,8 @@ type EditorProps = {
 type EditorState = {
   name: string;
   color: string;
-  // TODO: add more later
+  moveLocation: string;
+  filter: string;
 };
 
 
@@ -28,7 +29,12 @@ export class Editor extends Component<EditorProps, EditorState> {
   constructor(props: EditorProps) {
     super(props);
 
-    this.state = {name: props.marker.name, color: props.marker.color};
+    this.state = {
+      name: props.marker.name,
+      color: props.marker.color,
+      moveLocation: "",
+      filter: "",
+    };
   }
 
   componentDidUpdate = (oldProps: EditorProps, _oldState: EditorState): void => {
@@ -40,14 +46,36 @@ export class Editor extends Component<EditorProps, EditorState> {
   };
 
   render = (): JSX.Element => {
-    const selectColor = useRef<HTMLSelectElement>(null);
+    const filteredBuildings = BUILDINGS.filter(building =>
+      building.longName.toLowerCase().includes(this.state.filter.toLowerCase())
+    );
+
     return <div>
         <p>
-          Name: <input type="text" value={this.state.name} readOnly/>
+          Name: <input
+            type="text"
+            value={this.state.name}
+            readOnly
+          />
         </p>
         <p>
-          Move To: <select> 
-            {BUILDINGS.map((building) => (
+          Color: <select 
+            value={this.state.color}
+            onChange={(e) => this.setState({color: e.target.value})}
+          >
+            {COLORS.map((color) => (
+              <option key={color} value={color}>
+                {color}
+              </option>
+            ))}
+          </select>
+        </p>
+        <p>
+          Move To: <select
+            onChange={(e) => this.setState({moveLocation: e.target.value})}
+          >
+            <option value="">Select a location</option>
+            {filteredBuildings.map((building) => (
               <option key={building.longName} value={building.longName}>
                 {building.longName}
               </option>
@@ -55,13 +83,11 @@ export class Editor extends Component<EditorProps, EditorState> {
           </select>
         </p>
         <p>
-          Color: <select ref={selectColor}>
-            {COLORS.map((color) => (
-              <option key={color} value={color}>
-                {color}
-              </option>
-            ))}
-          </select>
+          Filter: <input
+            type="text"
+            value={this.state.filter}
+            onChange={(e) => this.setState({filter: e.target.value})}
+          />
         </p>
         <button onClick={() => this.props.onSaveClick(
           this.state.name,
