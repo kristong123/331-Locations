@@ -51,9 +51,12 @@ export class Editor extends Component<EditorProps, EditorState> {
     const filteredBuildings = BUILDINGS.filter(building =>
       building.longName.toLowerCase().includes(this.state.filter.toLowerCase())
     );
+
     const newLocation = this.props.moveTo 
       || filteredBuildings.find(building => building.longName === this.state.moveLocation)?.location
       || this.props.marker.location;
+    
+    const locationChosen = this.props.moveTo !== undefined;
 
     return <div>
         <p>
@@ -75,14 +78,14 @@ export class Editor extends Component<EditorProps, EditorState> {
             ))}
           </select>
         </p>
-        <label>
+        {locationChosen && <label>
           <input 
             type="checkbox"
             checked={this.state.clickLocation}
             onChange={(e) => this.setState({clickLocation: e.target.checked})}
           /> move to new location (gray)
-        </label>
-        {!this.state.clickLocation && <p>
+        </label>}
+        {!locationChosen && <p>
           Move To: <select
             value={this.state.moveLocation}
             onChange={(e) => this.setState({moveLocation: e.target.value})}>
@@ -94,19 +97,21 @@ export class Editor extends Component<EditorProps, EditorState> {
             ))}
           </select>
         </p>}
-        {!this.state.clickLocation && <p>
+        {!locationChosen && <p>
           Filter: <input
             type="text"
             value={this.state.filter}
             onChange={(e) => this.setState({filter: e.target.value})}
           />
         </p>}
-        <button onClick={() => this.props.onSaveClick(
-          this.state.name,
-          this.state.color, 
-          newLocation
-        )}>Save</button>
-        <button onClick={this.props.onCancelClick}>Cancel</button>
+        <div>
+          <button onClick={() => this.props.onSaveClick(
+            this.state.name,
+            this.state.color, 
+            newLocation
+          )}>Save</button>
+          <button onClick={this.props.onCancelClick}>Cancel</button>
+        </div>
     </div>;
   };
 
