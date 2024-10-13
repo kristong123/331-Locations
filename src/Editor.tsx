@@ -1,4 +1,4 @@
-import React, { Component, useRef } from 'react';
+import React, { Component } from 'react';
 import { Location, Marker, COLORS } from './marker';
 import { BUILDINGS } from './buildings';
 
@@ -21,6 +21,7 @@ type EditorState = {
   color: string;
   moveLocation: string;
   filter: string;
+  clickLocation: boolean;
 };
 
 
@@ -34,6 +35,7 @@ export class Editor extends Component<EditorProps, EditorState> {
       color: props.marker.color,
       moveLocation: "",
       filter: "",
+      clickLocation: false
     };
   }
 
@@ -49,6 +51,9 @@ export class Editor extends Component<EditorProps, EditorState> {
     const filteredBuildings = BUILDINGS.filter(building =>
       building.longName.toLowerCase().includes(this.state.filter.toLowerCase())
     );
+    const newLocation = this.props.moveTo 
+      || filteredBuildings.find(building => building.longName === this.state.moveLocation)?.location
+      || this.props.marker.location;
 
     return <div>
         <p>
@@ -70,29 +75,36 @@ export class Editor extends Component<EditorProps, EditorState> {
             ))}
           </select>
         </p>
-        <p>
+        <label>
+          <input 
+            type="checkbox"
+            checked={this.state.clickLocation}
+            onChange={(e) => this.setState({clickLocation: e.target.checked})}
+          /> move to new location (gray)
+        </label>
+        {!this.state.clickLocation && <p>
           Move To: <select
-            onChange={(e) => this.setState({moveLocation: e.target.value})}
-          >
-            <option value="">Select a location</option>
+            value={this.state.moveLocation}
+            onChange={(e) => this.setState({moveLocation: e.target.value})}>
+            <option>Select a location</option>
             {filteredBuildings.map((building) => (
               <option key={building.longName} value={building.longName}>
                 {building.longName}
               </option>
             ))}
           </select>
-        </p>
-        <p>
+        </p>}
+        {!this.state.clickLocation && <p>
           Filter: <input
             type="text"
             value={this.state.filter}
             onChange={(e) => this.setState({filter: e.target.value})}
           />
-        </p>
+        </p>}
         <button onClick={() => this.props.onSaveClick(
           this.state.name,
-          selectColor.current!.value, 
-          this.props.marker.location
+          this.state.color, 
+          newLocation
         )}>Save</button>
         <button onClick={this.props.onCancelClick}>Cancel</button>
     </div>;
